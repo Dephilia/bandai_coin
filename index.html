@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title>萬代幣計算機</title>
+	<meta charset="utf8"/>
+	<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+	<script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas/4.2.5/tocas.min.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tocas/4.2.5/tocas.min.js"></script>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+    </head>
+    <py-script>
+	def find_combination(n, bills=[273, 300, 455, 500, 910, 1000, 1819, 2000, 2728, 3000, 4546, 5000, 9091, 10000]):
+            # Sort the bills in descending order
+            bills = sorted(bills, reverse=True)
+            # Initialize the memoization table
+            memo = [[None] * (n+1) for _ in range(len(bills)+1)]
+            # Define a recursive function to find the combination
+            def find_combination_helper(i, n):
+                #print(i, n)
+                # If the current sum is less than 0, return None
+                if n < 0:
+                    return None
+                # If the current sum is 0, return an empty list
+                if n == 0:
+                    return []
+                # If the current bill is not valid or the memoization table has a value, return the memoized value
+                if i >= len(bills) or memo[i][n] is not None:
+                    return memo[i][n]
+                # Try using the current bill
+                use_curr = find_combination_helper(i, n - bills[i])
+                if use_curr is not None:
+                    use_curr = [bills[i]] + use_curr
+                # Try skipping the current bill
+                skip_curr = find_combination_helper(i + 1, n)
+                # Choose the better option
+                if use_curr is None:
+                    memo[i][n] = skip_curr
+                elif skip_curr is None:
+                    memo[i][n] = use_curr
+                else:
+                    memo[i][n] = use_curr if len(use_curr) < len(skip_curr) else skip_curr
+                return memo[i][n]
+            # Call the recursive function
+            result = find_combination_helper(0, n)
+            # Return the result
+            if result is None:
+                return find_combination(n + 1, bills)
+            return result
+
+	botton = Element("cal")
+	coin = Element("coin")
+	result1 = Element("result1")
+	result2 = Element("result2")
+
+	def cal(*args, **kws):
+	    if not coin.element.value:
+	        return None
+	    try:
+	        target = int(coin.element.value)
+	    except:
+	        result1.element.innerText = "無效的數字"
+	        return
+
+	    try:
+	        if target >= 20000:
+	            t = target % 10000 + 10000
+	            remains = [10000] * ((target - 10000) // 10000)
+	            res = remains + find_combination(t)
+	        else:
+	            res = find_combination(target)
+	    except:
+	        result1.element.innerText = "這個數字算不出來QQ"
+	        return
+	    result1.element.innerText = f"所需萬代幣組合: {str(res)}"
+	    result2.element.innerText = f"所需萬代幣總額: {sum(res)}"
+
+	def cal_event(e):
+	    if e.key == "Enter":
+	        cal()
+
+	coin.element.onkeypress = cal_event
+    </py-script>
+    <body>
+	<div class="ts-center">
+	    <div class="ts-wrap is-vertical">
+		<div class="ts-header is-icon">
+		    <span class="ts-icon is-coins-icon"></span>
+		    到底要怎樣才能歸零萬代幣...
+		</div>
+		<div class="ts-input">
+		    <input id="coin" type="text" placeholder="請輸入萬代幣數量">
+		    <button id="cal" class="ts-button" py-click="cal()">送出</button>
+		</div>
+		<div class="ts-notice">
+		    <div class="ts-text is-center-aligned" id="result1"></div>
+		</div>
+		<div class="ts-notice">
+		    <div class="ts-text is-center-aligned" id="result2"></div>
+		</div>
+	    </div>
+	</div>
+    </body>
+</html>
