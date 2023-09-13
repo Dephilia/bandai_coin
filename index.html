@@ -64,17 +64,27 @@
 	        target = int(coin.element.value)
 	    except:
 	        result1.element.innerText = "無效的數字"
+	        result2.element.innerText = ""
 	        return
 
 	    try:
-	        if target >= 20000:
+	        if target >= 100000:
+	            result1.element.innerText = "警告: 您一次只能持有100000枚萬代幣，如有需求請參考其他付款方式"
+	            result2.element.innerText = ""
+	            return
+	        elif target >= 20000:
 	            t = target % 10000 + 10000
 	            remains = [10000] * ((target - 10000) // 10000)
 	            res = remains + find_combination(t)
+	        elif target < 0:
+	            result1.element.innerText = f"萬代需要倒貼你{abs(target)}枚萬代幣"
+	            result2.element.innerText = ""
+	            return
 	        else:
 	            res = find_combination(target)
 	    except:
 	        result1.element.innerText = "這個數字算不出來QQ"
+	        result2.element.innerText = ""
 	        return
 	    result1.element.innerText = f"所需萬代幣組合: {str(res)}"
 	    result2.element.innerText = f"所需萬代幣總額: {sum(res)}"
