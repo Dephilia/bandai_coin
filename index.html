@@ -55,8 +55,35 @@
 
 	botton = Element("cal")
 	coin = Element("coin")
-	result1 = Element("result1")
-	result2 = Element("result2")
+
+	def update_msg(msg1:str, msg2:str=""):
+	    result1 = Element("result1")
+	    result2 = Element("result2")
+	    box_result1 = Element("result1-container")
+	    box_result2 = Element("result2-container")
+
+	    if msg1:
+	        box_result1.element.style.display = 'block'
+	        result1.element.innerText = msg1
+	    else:
+	        box_result1.element.style.display = 'none'
+	    if msg2:
+	        box_result2.element.style.display = 'block'
+	        result2.element.innerText = msg2
+	    else:
+	        box_result2.element.style.display = 'none'
+	
+	def print_res(res:list[int]):
+	    res_dict = {}
+	    for i in res:
+	        if i in res_dict:
+	            res_dict[i] += 1
+	        else:
+	            res_dict[i] = 1
+	    res_str = ""
+	    for (coin, num) in res_dict.items():
+	        res_str += f"✧{coin}x{num} "
+	    return res_str
 
 	def cal(*args, **kws):
 	    if not coin.element.value:
@@ -64,31 +91,31 @@
 	    try:
 	        target = int(coin.element.value)
 	    except:
-	        result1.element.innerText = "無效的數字"
-	        result2.element.innerText = ""
+	        update_msg("無效的數字")
 	        return
 
 	    try:
 	        if target >= 100000:
-	            result1.element.innerText = "警告: 您一次只能持有100000枚萬代幣，如有需求請參考其他付款方式"
-	            result2.element.innerText = ""
+	            update_msg("警告: 您一次只能持有100000枚萬代幣，如有需求請參考其他付款方式")
 	            return
 	        elif target >= 20000:
 	            t = target % 10000 + 10000
 	            remains = [10000] * ((target - 10000) // 10000)
 	            res = remains + find_combination(t)
 	        elif target < 0:
-	            result1.element.innerText = f"萬代需要倒貼你{abs(target)}枚萬代幣"
-	            result2.element.innerText = ""
+	            update_msg(f"萬代需要倒貼你{abs(target)}枚萬代幣")
 	            return
 	        else:
 	            res = find_combination(target)
 	    except:
-	        result1.element.innerText = "這個數字算不出來QQ"
-	        result2.element.innerText = ""
+	        update_msg("這個數字算不出來QQ")
 	        return
-	    result1.element.innerText = f"所需萬代幣組合: {str(res)}"
-	    result2.element.innerText = f"所需萬代幣總額: {sum(res)}"
+
+	    warn_msg = "(持有的萬代幣少到不能歸零...)"
+	    update_msg(
+	        f"[所需萬代幣組合] {print_res(res)}",
+		f"[所需萬代幣總額] {sum(res)} {warn_msg if sum(res)!=target else ''}"
+	    )
 
 	def cal_event(e):
 	    if e.key == "Enter":
@@ -107,10 +134,10 @@
 		    <input id="coin" type="text" placeholder="請輸入萬代幣數量">
 		    <button id="cal" class="ts-button" py-click="cal()">送出</button>
 		</div>
-		<div class="ts-notice">
+		<div style="display:none;" id="result1-container" class="ts-notice">
 		    <div class="ts-text is-center-aligned" id="result1"></div>
 		</div>
-		<div class="ts-notice">
+		<div style="display:none;" id="result2-container" class="ts-notice">
 		    <div class="ts-text is-center-aligned" id="result2"></div>
 		</div>
 	    </div>
