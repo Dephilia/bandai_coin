@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
-    <head>
+
+<head>
 	<title>萬代幣計算機</title>
-	<meta charset="utf8"/>
+	<meta charset="utf8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-	<script defer src="https://pyscript.net/latest/pyscript.js"></script>
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas/4.2.5/tocas.min.css" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tocas/4.2.5/tocas.min.js"></script>
@@ -13,134 +12,168 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
-    </head>
-    <py-script>
-	def find_combination(n, bills=[273, 300, 455, 500, 910, 1000, 1819, 2000, 2728, 3000, 4546, 5000, 9091, 10000]):
-            # Sort the bills in descending order
-            bills = sorted(bills, reverse=True)
-            # Initialize the memoization table
-            memo = [[None] * (n+1) for _ in range(len(bills)+1)]
-            # Define a recursive function to find the combination
-            def find_combination_helper(i, n):
-                #print(i, n)
-                # If the current sum is less than 0, return None
-                if n < 0:
-                    return None
-                # If the current sum is 0, return an empty list
-                if n == 0:
-                    return []
-                # If the current bill is not valid or the memoization table has a value, return the memoized value
-                if i >= len(bills) or memo[i][n] is not None:
-                    return memo[i][n]
-                # Try using the current bill
-                use_curr = find_combination_helper(i, n - bills[i])
-                if use_curr is not None:
-                    use_curr = [bills[i]] + use_curr
-                # Try skipping the current bill
-                skip_curr = find_combination_helper(i + 1, n)
-                # Choose the better option
-                if use_curr is None:
-                    memo[i][n] = skip_curr
-                elif skip_curr is None:
-                    memo[i][n] = use_curr
-                else:
-                    memo[i][n] = use_curr if len(use_curr) < len(skip_curr) else skip_curr
-                return memo[i][n]
-            # Call the recursive function
-            result = find_combination_helper(0, n)
-            # Return the result
-            if result is None:
-                return find_combination(n + 1, bills)
-            return result
+</head>
+<script>
+	function findCombination(n, bills = [273, 300, 455, 500, 910, 1000, 1819, 2000, 2728, 3000, 4546, 5000, 9091, 10000]) {
+		// Sort the bills in descending order
+		bills = bills.sort((a, b) => b - a);
 
-	botton = Element("cal")
-	coin = Element("coin")
+		// Initialize the memoization table
+		const memo = Array.from({length: bills.length + 1}, () => Array(n + 1).fill(null));
 
-	def update_msg(msg1:str, msg2:str=""):
-	    result1 = Element("result1")
-	    result2 = Element("result2")
-	    box_result1 = Element("result1-container")
-	    box_result2 = Element("result2-container")
+		// Define a recursive function to find the combination
+		function findCombinationHelper(i, n) {
+			// If the current sum is less than 0, return null
+			if (n < 0) {
+				return null;
+			}
 
-	    if msg1:
-	        box_result1.element.style.display = 'block'
-	        result1.element.innerText = msg1
-	    else:
-	        box_result1.element.style.display = 'none'
-	    if msg2:
-	        box_result2.element.style.display = 'block'
-	        result2.element.innerText = msg2
-	    else:
-	        box_result2.element.style.display = 'none'
-	
-	def print_res(res:list[int]):
-	    res_dict = {}
-	    for i in res:
-	        if i in res_dict:
-	            res_dict[i] += 1
-	        else:
-	            res_dict[i] = 1
-	    res_str = ""
-	    for (coin, num) in res_dict.items():
-	        res_str += f"✧{coin}x{num} "
-	    return res_str
+			// If the current sum is 0, return an empty array
+			if (n === 0) {
+				return [];
+			}
 
-	def cal(*args, **kws):
-	    if not coin.element.value:
-	        return None
-	    try:
-	        target = int(coin.element.value)
-	    except:
-	        update_msg("無效的數字")
-	        return
+			// If the current bill is not valid or the memoization table has a value, return the memoized value
+			if (i >= bills.length || memo[i][n] !== null) {
+				return memo[i][n];
+			}
 
-	    try:
-	        if target >= 100000:
-	            update_msg("警告: 您一次只能持有100000枚萬代幣，如有需求請參考其他付款方式")
-	            return
-	        elif target >= 20000:
-	            t = target % 10000 + 10000
-	            remains = [10000] * ((target - 10000) // 10000)
-	            res = remains + find_combination(t)
-	        elif target < 0:
-	            update_msg(f"萬代需要倒貼你{abs(target)}枚萬代幣")
-	            return
-	        else:
-	            res = find_combination(target)
-	    except:
-	        update_msg("這個數字算不出來QQ")
-	        return
+			// Try using the current bill
+			let useCurr = findCombinationHelper(i, n - bills[i]);
+			if (useCurr !== null) {
+				useCurr = [bills[i], ...useCurr];
+			}
 
-	    warn_msg = "(持有的萬代幣少到不能歸零...)"
-	    update_msg(
-	        f"[所需萬代幣組合] {print_res(res)}",
-		f"[所需萬代幣總額] {sum(res)} {warn_msg if sum(res)!=target else ''}"
-	    )
+			// Try skipping the current bill
+			const skipCurr = findCombinationHelper(i + 1, n);
 
-	def cal_event(e):
-	    if e.key == "Enter":
-	        cal()
+			// Choose the better option
+			if (useCurr === null) {
+				memo[i][n] = skipCurr;
+			} else if (skipCurr === null) {
+				memo[i][n] = useCurr;
+			} else {
+				memo[i][n] = useCurr.length < skipCurr.length ? useCurr : skipCurr;
+			}
 
-	coin.element.onkeypress = cal_event
-    </py-script>
-    <body>
+			return memo[i][n];
+		}
+
+		// Call the recursive function
+		const result = findCombinationHelper(0, n);
+
+		// Return the result
+		if (result === null) {
+			return findCombination(n + 1, bills);
+		}
+
+		return result;
+	}
+
+	function updateMsg(msg1, msg2 = "") {
+		const result1 = document.getElementById("result1");
+		const result2 = document.getElementById("result2");
+		const boxResult1 = document.getElementById("result1-container");
+		const boxResult2 = document.getElementById("result2-container");
+
+		if (msg1) {
+			boxResult1.style.display = 'block';
+			result1.innerText = msg1;
+		} else {
+			boxResult1.style.display = 'none';
+		}
+
+		if (msg2) {
+			boxResult2.style.display = 'block';
+			result2.innerText = msg2;
+		} else {
+			boxResult2.style.display = 'none';
+		}
+	}
+
+	function printRes(res) {
+		const button = document.getElementById("cal");
+		const coin = document.getElementById("coin");
+		const resDict = {};
+		for (const i of res) {
+			resDict[i] = (resDict[i] || 0) + 1;
+		}
+
+		let resStr = "";
+		for (const [coin, num] of Object.entries(resDict)) {
+			resStr += `✧${coin}x${num} `;
+		}
+
+		return resStr;
+	}
+
+	function cal() {
+		const button = document.getElementById("cal");
+		const coin = document.getElementById("coin");
+		if (!coin.value) {
+			return null;
+		}
+		const target = parseInt(coin.value, 10);
+
+		let res;
+
+		try {
+			if (target >= 100000) {
+				updateMsg("警告: 您一次只能持有100000枚萬代幣，如有需求請參考其他付款方式");
+				return;
+			} else if (target >= 20000) {
+				const t = target % 10000 + 10000;
+				const remains = Array((target - 10000) / 10000 | 0).fill(10000);
+				res = [...remains, ...findCombination(t)];
+			} else if (target < 0) {
+				updateMsg(`萬代需要倒貼你${Math.abs(target)}枚萬代幣`);
+				return;
+			} else {
+				res = findCombination(target);
+			}
+		} catch (error) {
+			updateMsg("這個數字算不出來QQ");
+			return;
+		}
+
+		const warnMsg = "(持有的萬代幣少到不能歸零...)";
+		const total = res.reduce((acc, val) => acc + val, 0);
+		const resultMessage = `[所需萬代幣總額] ${total} ${total !== target ? warnMsg : ''}`;
+		updateMsg(
+			`[所需萬代幣組合] ${printRes(res)}`,
+			resultMessage
+		);
+	}
+
+	function calEvent(e) {
+		if (e.key === "Enter") {
+			cal();
+		}
+	}
+
+	coin.addEventListener("keypress", calEvent);
+
+</script>
+
+<body>
 	<div class="ts-center">
-	    <div class="ts-wrap is-vertical">
-		<div class="ts-header is-icon">
-		    <span class="ts-icon is-coins-icon"></span>
-		    到底要怎樣才能歸零萬代幣...
+		<div class="ts-wrap is-vertical">
+			<div class="ts-header is-icon">
+				<span class="ts-icon is-coins-icon"></span>
+				到底要怎樣才能歸零萬代幣...
+			</div>
+			<div class="ts-input">
+				<input id="coin" type="text" placeholder="請輸入萬代幣數量">
+				<button id="cal" class="ts-button" onclick="cal()">送出</button>
+			</div>
+			<div style="display:none;" id="result1-container" class="ts-notice">
+				<div class="ts-text is-center-aligned" id="result1"></div>
+			</div>
+			<div style="display:none;" id="result2-container" class="ts-notice">
+				<div class="ts-text is-center-aligned" id="result2"></div>
+			</div>
 		</div>
-		<div class="ts-input">
-		    <input id="coin" type="text" placeholder="請輸入萬代幣數量">
-		    <button id="cal" class="ts-button" py-click="cal()">送出</button>
-		</div>
-		<div style="display:none;" id="result1-container" class="ts-notice">
-		    <div class="ts-text is-center-aligned" id="result1"></div>
-		</div>
-		<div style="display:none;" id="result2-container" class="ts-notice">
-		    <div class="ts-text is-center-aligned" id="result2"></div>
-		</div>
-	    </div>
 	</div>
-    </body>
+</body>
+
 </html>
